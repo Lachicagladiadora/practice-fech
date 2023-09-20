@@ -21,11 +21,11 @@ type GetUsersOutput = User[]
 
 type CreateUserInput = { user: NewUser }
 
-type UpdateUserInput = { user: NewUser}
+type UpdateUserInput = { user: NewUser }
 
 const url = 'http://localhost:3000'
 
-const generateNewUser = ():NewUser => {
+const generateNewUser = (): NewUser => {
   const userName = names[Math.floor(Math.random() * 100)]
   const age = Math.floor((Math.random() * 80) + 18)
   const nickName = names.map((name): string => {
@@ -40,7 +40,7 @@ const generateNewUser = ():NewUser => {
 function App() {
   const [count, setCount] = useState(0)
   const [users, setUsers] = useState<User[]>([])
-  const [userForm, setUserForm] = useState<NewUser>({name: '', age: '', email: ''})
+  const [userForm, setUserForm] = useState<NewUser>({ name: '', age: '', email: '' })
 
   const onGetUsers = async () => {
     try {
@@ -62,12 +62,12 @@ function App() {
     }
   }
 
-  const onUpdateUser = async (id:string, user:User) => {
+  const onUpdateUser = async (id: string, user: User) => {
     try {
-      const updatedUser: Partial<User> = {...user, name: `${user.name} edit-${Math.round(Math.random()*10_000)}` }
+      const updatedUser: Partial<User> = { ...user, name: `${user.name} edit-${Math.round(Math.random() * 10_000)}` }
       delete updatedUser.id
-      const data = await PUT<User, UpdateUserInput>(`${url}/users/${id}`, { user: updatedUser} as UpdateUserInput)
-      setUsers((users) => users.map((c)=>c.id===id?data: c))
+      const data = await PUT<User, UpdateUserInput>(`${url}/users/${id}`, { user: updatedUser } as UpdateUserInput)
+      setUsers((users) => users.map((c) => c.id === id ? data : c))
     } catch (error) {
       console.error(error)
     }
@@ -76,7 +76,7 @@ function App() {
   const onDeleteUser = async (id: string) => {
     try {
       await DELETE<string>(`${url}/users/${id}`,)
-      setUsers((users) => users.filter((c)=>c.id !== id))
+      setUsers((users) => users.filter((c) => c.id !== id))
     } catch (error) {
       console.error(error)
     }
@@ -85,9 +85,9 @@ function App() {
   const onDisplayUser = async (id: string) => {
     try {
       const data = await GET<User>(`${url}/users/${id}`)
-      if(!data) return window.alert('oops, this user does not exist')
+      if (!data) return window.alert('oops, this user does not exist')
 
-      const userInfo =  `Name: ${data.name}\nAge: ${data.age}\nEmail: ${data.email}`
+      const userInfo = `Name: ${data.name}\nAge: ${data.age}\nEmail: ${data.email}`
       window.alert(userInfo)
     } catch (error) {
       console.error(error)
@@ -109,6 +109,36 @@ function App() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
+        <form onSubmit={onCreateUser} style={{ padding: '5px', margin: '10px', width: '300px', border: 'solid 1px grey', borderRadius: '10px' }}>
+          <h3 style={{margin: '5px'}}>New User</h3>
+          <div style={{
+            padding: '5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <label htmlFor="userName">Name </label>
+            <input id="userName" type="text" placeholder='write name' value={userForm.name} onChange={(e) => setUserForm((pre) => ({ ...pre, name: e.target.value }))} />
+          </div>
+          <div style={{
+            padding: '5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <label htmlFor="age">Age </label>
+            <input id="age" type="text" placeholder='write age' value={userForm.age} onChange={(e) => setUserForm((pre) => ({ ...pre, age: e.target.value }))} />
+          </div>
+          <div style={{
+            padding: '5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <label htmlFor="email">Email </label>
+            <input id="email" type="text" placeholder='write email' value={userForm.email} onChange={(e) => setUserForm((pre) => ({ ...pre, email: e.target.value }))} />
+          </div>
+        </form>
         <button onClick={onGetUsers}>
           fetch get
         </button>
@@ -116,35 +146,15 @@ function App() {
           fetch post
         </button>
         <div>
-          {users.map((c) => 
-            <div key={c.id} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0px'}}>
+          {users.map((c) =>
+            <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0px' }}>
               <p onClick={() => onDisplayUser(c.id)}>{c.name}</p>
-              <div style={{display: 'flex'}}>
-                <button onClick={()=>onUpdateUser(c.id, c)}>Edit</button>
-                <button onClick={()=>onDeleteUser(c.id)}>Delete</button>
+              <div style={{ display: 'flex' }}>
+                <button onClick={() => onUpdateUser(c.id, c)}>Edit</button>
+                <button onClick={() => onDeleteUser(c.id)}>Delete</button>
               </div>
             </div>)}
         </div>
-          <form onSubmit={onCreateUser} >
-        <div style={{
-          display: 'flex',
-        }}>
-          <label htmlFor="userName">Name </label>
-          <input id="userName" type="text" placeholder='write name' value={userForm.name} onChange={(e)=>setUserForm((pre)=>({...pre, name: e.target.value}))}/>
-        </div>
-        <div style={{
-          display: 'flex',
-        }}>
-          <label htmlFor="age">Age </label> 
-          <input id="age" type="text" placeholder='write age' value={userForm.age} onChange={(e)=>setUserForm((pre)=>({...pre, age: e.target.value}))}/>
-        </div>
-        <div style={{
-          display: 'flex',
-        }}>
-            <label htmlFor="email">Email </label>
-            <input id="email" type="text" placeholder='write email' value={userForm.email} onChange={(e)=>setUserForm((pre)=> ({...pre, email: e.target.value}))}/>
-        </div>
-          </form>
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
@@ -174,19 +184,23 @@ const POST = async<R, P>(url: string, body: P): Promise<R> => {
 }
 
 // PUT
-const PUT = async<R,P>(url: string, body: P): Promise<R> => {
-  const res = await fetch(url, { method: 'PUT', body: JSON.stringify(body) , headers: {
-    "Content-type": "application/json; charset=UTF-8"
-  }})
+const PUT = async<R, P>(url: string, body: P): Promise<R> => {
+  const res = await fetch(url, {
+    method: 'PUT', body: JSON.stringify(body), headers: {
+      "Content-type": "application/json; charset=UTF-8"
+    }
+  })
   const data = res.json()
   return data
 }
 
 // DELETE
 const DELETE = async<R,>(url: string): Promise<R> => {
-  const res = await fetch(url, { method: 'DELETE' , headers: {
-    "Content-type": "application/json; charset=UTF-8"
-  }})
+  const res = await fetch(url, {
+    method: 'DELETE', headers: {
+      "Content-type": "application/json; charset=UTF-8"
+    }
+  })
   const data = res.json()
   return data
 }
