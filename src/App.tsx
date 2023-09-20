@@ -54,7 +54,7 @@ function App() {
   const onCreateUser = async () => {
     try {
       // const name = (document.getElementById('userName') as HTMLInputElement)?.value ?? ''
-      const newUser = generateNewUser()
+      // const newUser = generateNewUser()
       const data = await POST<User, CreateUserInput>(`${url}/users`, { user: userForm })
       setUsers((users) => [...users, data])
     } catch (error) {
@@ -109,6 +109,7 @@ function App() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
+
         <form onSubmit={onCreateUser} style={{ padding: '5px', margin: '10px', width: '300px', border: 'solid 1px grey', borderRadius: '10px' }}>
           <h3 style={{margin: '5px'}}>New User</h3>
           <div style={{
@@ -139,11 +140,12 @@ function App() {
             <input id="email" type="text" placeholder='write email' value={userForm.email} onChange={(e) => setUserForm((pre) => ({ ...pre, email: e.target.value }))} />
           </div>
         </form>
+
         <button onClick={onGetUsers}>
-          fetch get
+          Get Users
         </button>
         <button onClick={onCreateUser}>
-          fetch post
+          Post User
         </button>
         <div>
           {users.map((c) =>
