@@ -40,6 +40,7 @@ const generateNewUser = ():NewUser => {
 function App() {
   const [count, setCount] = useState(0)
   const [users, setUsers] = useState<User[]>([])
+  const [userForm, setUserForm] = useState<NewUser>({name: '', age: '', email: ''})
 
   const onGetUsers = async () => {
     try {
@@ -52,8 +53,9 @@ function App() {
 
   const onCreateUser = async () => {
     try {
+      // const name = (document.getElementById('userName') as HTMLInputElement)?.value ?? ''
       const newUser = generateNewUser()
-      const data = await POST<User, CreateUserInput>(`${url}/users`, { user: newUser })
+      const data = await POST<User, CreateUserInput>(`${url}/users`, { user: userForm })
       setUsers((users) => [...users, data])
     } catch (error) {
       console.error(error)
@@ -123,6 +125,26 @@ function App() {
               </div>
             </div>)}
         </div>
+          <form onSubmit={onCreateUser} >
+        <div style={{
+          display: 'flex',
+        }}>
+          <label htmlFor="userName">Name </label>
+          <input id="userName" type="text" placeholder='write name' value={userForm.name} onChange={(e)=>setUserForm((pre)=>({...pre, name: e.target.value}))}/>
+        </div>
+        <div style={{
+          display: 'flex',
+        }}>
+          <label htmlFor="age">Age </label> 
+          <input id="age" type="text" placeholder='write age' value={userForm.age} onChange={(e)=>setUserForm((pre)=>({...pre, age: e.target.value}))}/>
+        </div>
+        <div style={{
+          display: 'flex',
+        }}>
+            <label htmlFor="email">Email </label>
+            <input id="email" type="text" placeholder='write email' value={userForm.email} onChange={(e)=>setUserForm((pre)=> ({...pre, email: e.target.value}))}/>
+        </div>
+          </form>
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
