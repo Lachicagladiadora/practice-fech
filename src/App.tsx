@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { useFetch } from './hooks/useFetch'
 // import { domains, names } from './constants'
 
 type User = {
@@ -31,7 +32,7 @@ function App() {
   const [count, setCount] = useState(0)
   const [users, setUsers] = useState<User[]>([])
   const [userForm, setUserForm] = useState<NewUser>(initialUser)
-
+  const {customFetch, data}= useFetch({url: 'https://api.chucknorris.io/jokes/random', method: 'GET', body: ''})
 
   const onCreateUser = async () => {
     try {
