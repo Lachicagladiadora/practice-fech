@@ -25,30 +25,20 @@ type UpdateUserInput = { user: NewUser }
 
 const url = 'http://localhost:3000'
 
-// const generateNewUser = (): NewUser => {
-//   const userName = names[Math.floor(Math.random() * 100)]
-//   const age = Math.floor((Math.random() * 80) + 18)
-//   const nickName = names.map((name): string => {
-//     const username = name.toLowerCase().replace(/\bth|\b[a-zA-Z]*[aeiouy]\b/g, `${name}${Math.floor(Math.random() * 1000)}`);
-//     return username;
-//   })[Math.floor(Math.random() * 100)];
-//   const domain = domains[Math.floor(Math.random() * 4)]
-//   const newUser: NewUser = { name: `${userName}`, age: `${age}`, email: `${nickName}@${domain}.com` }
-//   return newUser
-// }
+const initialUser = { name: '', age: '', email: '' }
 
 function App() {
   const [count, setCount] = useState(0)
   const [users, setUsers] = useState<User[]>([])
-  const [userForm, setUserForm] = useState<NewUser>({ name: '', age: '', email: '' })
+  const [userForm, setUserForm] = useState<NewUser>(initialUser)
 
 
   const onCreateUser = async () => {
     try {
-      // const name = (document.getElementById('userName') as HTMLInputElement)?.value ?? ''
-      // const newUser = generateNewUser()
+
       const data = await POST<User, CreateUserInput>(`${url}/users`, { user: userForm })
       setUsers((users) => [...users, data])
+      setUserForm(initialUser)
     } catch (error) {
       console.error(error)
     }
