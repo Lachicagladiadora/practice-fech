@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -42,14 +42,6 @@ function App() {
   const [users, setUsers] = useState<User[]>([])
   const [userForm, setUserForm] = useState<NewUser>({ name: '', age: '', email: '' })
 
-  const onGetUsers = async () => {
-    try {
-      const data = await GET<GetUsersOutput>(`${url}/users`)
-      setUsers(data)
-    } catch (error) {
-      console.error(error)
-    }
-  }
 
   const onCreateUser = async () => {
     try {
@@ -94,6 +86,17 @@ function App() {
     }
   }
 
+  const onGetUsers = async () => {
+    try {
+      const data = await GET<GetUsersOutput>(`${url}/users`)
+      setUsers(data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => { onGetUsers() }, [users, userForm])
+
   return (
     <>
       <div>
@@ -111,41 +114,23 @@ function App() {
         </button>
 
         <form onSubmit={onCreateUser} style={{ padding: '5px', margin: '10px', width: '300px', border: 'solid 1px grey', borderRadius: '10px' }}>
-          <h3 style={{margin: '5px'}}>New User</h3>
-          <div style={{
-            padding: '5px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
+          <h3 style={{ margin: '5px' }}>New User</h3>
+          <div style={{padding: '5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
             <label htmlFor="userName">Name </label>
             <input id="userName" type="text" placeholder='write name' value={userForm.name} onChange={(e) => setUserForm((pre) => ({ ...pre, name: e.target.value }))} />
           </div>
-          <div style={{
-            padding: '5px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
+          <div style={{padding: '5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
             <label htmlFor="age">Age </label>
             <input id="age" type="text" placeholder='write age' value={userForm.age} onChange={(e) => setUserForm((pre) => ({ ...pre, age: e.target.value }))} />
           </div>
-          <div style={{
-            padding: '5px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
+          <div style={{padding: '5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
             <label htmlFor="email">Email </label>
             <input id="email" type="text" placeholder='write email' value={userForm.email} onChange={(e) => setUserForm((pre) => ({ ...pre, email: e.target.value }))} />
           </div>
         </form>
 
-        <button onClick={onGetUsers}>
-          Get Users
-        </button>
         <button onClick={onCreateUser}>
-          Post User
+          Save
         </button>
         <div>
           {users.map((c) =>
