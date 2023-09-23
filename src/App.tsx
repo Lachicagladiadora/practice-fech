@@ -28,11 +28,19 @@ const url = 'http://localhost:3000'
 
 const initialUser = { name: '', age: '', email: '' }
 
+type Joke = {value: string}
+
 function App() {
   const [count, setCount] = useState(0)
   const [users, setUsers] = useState<User[]>([])
   const [userForm, setUserForm] = useState<NewUser>(initialUser)
-  const {customFetch, data}= useFetch({url: 'https://api.chucknorris.io/jokes/random', method: 'GET', body: ''})
+  const [getJoke,joke,isLoadingJoke,jokeError]= useFetch<Joke, undefined>({url: 'https://api.chucknorris.io/jokes/random', method: 'GET'})
+  // const {customFetch: customFetch2, data}= useFetch({url: 'https://api.chucknorris.io/jokes/random', method: 'GET'})
+
+  console.log({isLoadingJoke})
+  console.log('Joke' + joke)
+
+  useEffect(()=>{getJoke(undefined)},[])
 
   const onCreateUser = async () => {
     try {
@@ -99,6 +107,13 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
+      {/* {jokeError && <article style={{border: 'dash 2px red'}}>
+        <p style={{color:'red'}}>Oops! can not charge, try again later</p>
+      </article>} */}
+      {!jokeError && <article style={{border: 'dashed 2px royalblue'}}>
+        <h2>Chuck Norris Joke</h2>
+        <p>{isLoadingJoke ? 'Loading...' : joke?.value}</p>
+      </article>}
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}

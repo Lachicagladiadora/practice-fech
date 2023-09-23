@@ -1,33 +1,32 @@
-// create hook
-// pass parameters, url, method, body
-//  return data,  isLoading, error->(string or something error)
-
-
-
 import { useState } from "react"
+import { DELETE, GET, POST, PUT } from "../utils/fetch.utils"
 
 type MethodType = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
 type UseFetchProps = {
   url: string,
   method: MethodType,
-  body: any
 }
 
+type UseFetchOutput<R,P> = [(body: P) => Promise<void>, R | null , boolean, string]
 
-export const useFetch = ({ url, method, body }: UseFetchProps) => { 
-  const [data, setData] = useState(null)
+/**
+ * @returns [customFetch, data, isLoading, error]
+ */
+
+export const useFetch = <R,P>({ url, method }: UseFetchProps): UseFetchOutput<R, P> => { 
+  const [data, setData] = useState<R | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-
-  const requestByMethod = (method: MethodType, url:string, body: any) => { // todo: explain how todo this by map object
-    if(method === 'GET') return GET(url)
-    if(method === 'POST') return POST(url, body)
-    if(method === 'PUT') return PUT(url, body)
-    if(method === 'DELETE') return DELETE(url)
+  const requestByMethod = (method: MethodType, url:string, body: P):Promise<R> => { 
+    if(method === 'GET') return GET<R>(url)
+    if(method === 'POST') return POST<R,P>(url, body)
+    if(method === 'PUT') return PUT<R,P>(url, body)
+    if(method === 'DELETE') return DELETE<R>(url)
+    throw Error('invalid method')
   }
 
-  const customFetch = async () => {
+  const customFetch = async (body:P):Promise<void> => {
     try {
       setIsLoading(true)
       const result = await requestByMethod(method, url, body)
@@ -38,46 +37,8 @@ export const useFetch = ({ url, method, body }: UseFetchProps) => {
       setError('Oops! Can not complete this operation, try again later')
     }
   }
-
-  return { customFetch, data, isLoading, error}
+  return [customFetch, data, isLoading, error]
 }
 
-const GET = async<T,>(url: string): Promise<T> => {
-  const res = await fetch(url)
-  const data = await res.json()
-  return data
-}
 
-// POST
-const POST = async<R, P>(url: string, body: P): Promise<R> => {
-  const res = await fetch(url, {
-    method: 'POST', body: JSON.stringify(body), headers: {
-      "Content-type": "application/json; charset=UTF-8"
-    }
-  })
-  const data = res.json()
-  return data
-}
-
-// PUT
-const PUT = async<R, P>(url: string, body: P): Promise<R> => {
-  const res = await fetch(url, {
-    method: 'PUT', body: JSON.stringify(body), headers: {
-      "Content-type": "application/json; charset=UTF-8"
-    }
-  })
-  const data = res.json()
-  return data
-}
-
-// DELETE
-const DELETE = async<R,>(url: string): Promise<R> => {
-  const res = await fetch(url, {
-    method: 'DELETE', headers: {
-      "Content-type": "application/json; charset=UTF-8"
-    }
-  })
-  const data = res.json()
-  return data
-}
 
