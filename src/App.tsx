@@ -1,100 +1,97 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import { useFetch } from './hooks/useFetch'
-// import { domains, names } from './constants'
+import { useEffect, useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
+import { useFetch } from "./hooks/useFetch";
 
 type User = {
-  id: string,
-  name: string,
-  age: string,
-  email: string
-}
+  id: string;
+  name: string;
+  age: string;
+  email: string;
+};
 
 type NewUser = {
-  name: string,
-  age: string,
-  email: string
-}
+  name: string;
+  age: string;
+  email: string;
+};
 
-type GetUsersOutput = User[]
+type GetUsersOutput = User[];
 
-type CreateUserInput = { user: NewUser }
+type CreateUserInput = { user: NewUser };
 
-type UpdateUserInput = { user: NewUser }
+type UpdateUserInput = { user: NewUser };
 
-const url = 'http://localhost:3000'
+const url = "http://localhost:3000";
 
-const initialUser = { name: '', age: '', email: '' }
-
-type Joke = {value: string}
+const initialUser = { name: "", age: "", email: "" };
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [users, setUsers] = useState<User[]>([])
-  const [userForm, setUserForm] = useState<NewUser>(initialUser)
-  const [getJoke,joke,isLoadingJoke,jokeError]= useFetch<Joke, undefined>({url: 'https://api.chucknorris.io/jokes/random', method: 'GET'})
-  // const {customFetch: customFetch2, data}= useFetch({url: 'https://api.chucknorris.io/jokes/random', method: 'GET'})
-
-  console.log({isLoadingJoke})
-  console.log('Joke' + joke)
-
-  useEffect(()=>{getJoke(undefined)},[])
+  const [count, setCount] = useState(0);
+  const [userForm, setUserForm] = useState<NewUser>(initialUser);
+  const [getUsers, users, isLoadingUsers, usersError] = useFetch<GetUsersOutput, undefined>({ url: `${url}/users`, method: "GET" });
 
   const onCreateUser = async () => {
     try {
-
-      const data = await POST<User, CreateUserInput>(`${url}/users`, { user: userForm })
-      setUsers((users) => [...users, data])
-      setUserForm(initialUser)
+      const data = await POST<User, CreateUserInput>(`${url}/users`, {
+        user: userForm,
+      });
+      setUsers((users) => [...users, data]);
+      setUserForm(initialUser);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   const onUpdateUser = async (id: string, user: User) => {
     try {
-      const updatedUser: Partial<User> = { ...user, name: `${user.name} edit-${Math.round(Math.random() * 10_000)}` }
-      delete updatedUser.id
-      const data = await PUT<User, UpdateUserInput>(`${url}/users/${id}`, { user: updatedUser } as UpdateUserInput)
-      setUsers((users) => users.map((c) => c.id === id ? data : c))
+      const updatedUser: Partial<User> = {
+        ...user,
+        name: `${user.name} edit-${Math.round(Math.random() * 10_000)}`,
+      };
+      delete updatedUser.id;
+      const data = await PUT<User, UpdateUserInput>(`${url}/users/${id}`, {
+        user: updatedUser,
+      } as UpdateUserInput);
+      setUsers((users) => users.map((c) => (c.id === id ? data : c)));
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   const onDeleteUser = async (id: string) => {
     try {
-      await DELETE<string>(`${url}/users/${id}`,)
-      setUsers((users) => users.filter((c) => c.id !== id))
+      await DELETE<string>(`${url}/users/${id}`);
+      setUsers((users) => users.filter((c) => c.id !== id));
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   const onDisplayUser = async (id: string) => {
     try {
-      const data = await GET<User>(`${url}/users/${id}`)
-      if (!data) return window.alert('oops, this user does not exist')
+      const data = await GET<User>(`${url}/users/${id}`);
+      if (!data) return window.alert("oops, this user does not exist");
 
-      const userInfo = `Name: ${data.name}\nAge: ${data.age}\nEmail: ${data.email}`
-      window.alert(userInfo)
+      const userInfo = `Name: ${data.name}\nAge: ${data.age}\nEmail: ${data.email}`;
+      window.alert(userInfo);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   const onGetUsers = async () => {
     try {
-      const data = await GET<GetUsersOutput>(`${url}/users`)
-      setUsers(data)
+      await getUsers(undefined);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
-  useEffect(() => { onGetUsers() }, [users, userForm])
+  useEffect(() => {
+    onGetUsers();
+  }, []);
 
   return (
     <>
@@ -106,95 +103,112 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
-      {/* {jokeError && <article style={{border: 'dash 2px red'}}>
-        <p style={{color:'red'}}>Oops! can not charge, try again later</p>
-      </article>} */}
-      {!jokeError && <article style={{border: 'dashed 2px royalblue'}}>
-        <h2>Chuck Norris Joke</h2>
-        <p>{isLoadingJoke ? 'Loading...' : joke?.value}</p>
-      </article>}
+
       <div className="card">
+        <h1>Vite + React</h1>
+
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
 
-        <form onSubmit={onCreateUser} style={{ padding: '5px', margin: '10px', width: '300px', border: 'solid 1px grey', borderRadius: '10px' }}>
-          <h3 style={{ margin: '5px' }}>New User</h3>
-          <div style={{padding: '5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+        <form onSubmit={onCreateUser} style={{ padding: "5px", margin: "10px", width: "300px", border: "solid 1px grey", borderRadius: "10px", }}>
+          <h3 style={{ margin: "5px" }}>New User</h3>
+          <div style={{ padding: "5px", display: "flex", alignItems: "center", justifyContent: "space-between", }}>
             <label htmlFor="userName">Name </label>
-            <input id="userName" type="text" placeholder='write name' value={userForm.name} onChange={(e) => setUserForm((pre) => ({ ...pre, name: e.target.value }))} />
+            <input id="userName" type="text" placeholder="write name" value={userForm.name}
+              onChange={(e) =>
+                setUserForm((pre) => ({ ...pre, name: e.target.value }))
+              }
+            />
           </div>
-          <div style={{padding: '5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+          <div style={{ padding: "5px", display: "flex", alignItems: "center", justifyContent: "space-between", }}>
             <label htmlFor="age">Age </label>
-            <input id="age" type="text" placeholder='write age' value={userForm.age} onChange={(e) => setUserForm((pre) => ({ ...pre, age: e.target.value }))} />
+            <input id="age" type="text" placeholder="write age" value={userForm.age}
+              onChange={(e) =>
+                setUserForm((pre) => ({ ...pre, age: e.target.value }))
+              }
+            />
           </div>
-          <div style={{padding: '5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+          <div style={{ padding: "5px", display: "flex", alignItems: "center", justifyContent: "space-between", }} >
             <label htmlFor="email">Email </label>
-            <input id="email" type="text" placeholder='write email' value={userForm.email} onChange={(e) => setUserForm((pre) => ({ ...pre, email: e.target.value }))} />
+            <input id="email" type="text" placeholder="write email" value={userForm.email}
+              onChange={(e) =>
+                setUserForm((pre) => ({ ...pre, email: e.target.value }))
+              }
+            />
           </div>
         </form>
 
-        <button onClick={onCreateUser}>
-          Save
-        </button>
+        <button onClick={onCreateUser}>Save</button>
         <div>
-          {users.map((c) =>
-            <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0px' }}>
-              <p onClick={() => onDisplayUser(c.id)}>{c.name}</p>
-              <div style={{ display: 'flex' }}>
-                <button onClick={() => onUpdateUser(c.id, c)}>Edit</button>
-                <button onClick={() => onDeleteUser(c.id)}>Delete</button>
+
+          <section style={{ border: "solid 2px green" }}>
+            <h2>USERS</h2>
+            {isLoadingUsers && <p>Is loading...</p>}
+            {!isLoadingUsers && usersError && <p>Can not get users, try again later</p>}
+            {!isLoadingUsers && !usersError && !users && <p>There is not users</p>}
+            {!isLoadingUsers && !usersError && users && users.map((c) => (
+              <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 0px", }}>
+                <p onClick={() => onDisplayUser(c.id)}>{c.name}</p>
+                <div style={{ display: "flex" }}>
+                  <button onClick={() => onUpdateUser(c.id, c)}>Edit</button>
+                  <button onClick={() => onDeleteUser(c.id)}>Delete</button>
+                </div>
               </div>
-            </div>)}
+            ))}
+          </section>
+
         </div>
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
 
-
-const GET = async<T,>(url: string): Promise<T> => {
-  const res = await fetch(url)
-  const data = await res.json()
-  return data
-}
+const GET = async <T,>(url: string): Promise<T> => {
+  const res = await fetch(url);
+  const data = await res.json();
+  return data;
+};
 
 // POST
-const POST = async<R, P>(url: string, body: P): Promise<R> => {
+const POST = async <R, P>(url: string, body: P): Promise<R> => {
   const res = await fetch(url, {
-    method: 'POST', body: JSON.stringify(body), headers: {
-      "Content-type": "application/json; charset=UTF-8"
-    }
-  })
-  const data = res.json()
-  return data
-}
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: {
+      "Content-type": "application/json; charset=UTF-8",
+    },
+  });
+  const data = res.json();
+  return data;
+};
 
 // PUT
-const PUT = async<R, P>(url: string, body: P): Promise<R> => {
+const PUT = async <R, P>(url: string, body: P): Promise<R> => {
   const res = await fetch(url, {
-    method: 'PUT', body: JSON.stringify(body), headers: {
-      "Content-type": "application/json; charset=UTF-8"
-    }
-  })
-  const data = res.json()
-  return data
-}
+    method: "PUT",
+    body: JSON.stringify(body),
+    headers: {
+      "Content-type": "application/json; charset=UTF-8",
+    },
+  });
+  const data = res.json();
+  return data;
+};
 
 // DELETE
-const DELETE = async<R,>(url: string): Promise<R> => {
+const DELETE = async <R,>(url: string): Promise<R> => {
   const res = await fetch(url, {
-    method: 'DELETE', headers: {
-      "Content-type": "application/json; charset=UTF-8"
-    }
-  })
-  const data = res.json()
-  return data
-}
-
+    method: "DELETE",
+    headers: {
+      "Content-type": "application/json; charset=UTF-8",
+    },
+  });
+  const data = res.json();
+  return data;
+};
