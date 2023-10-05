@@ -19,7 +19,7 @@ type NewUser = {
 
 type GetUsersOutput = User[];
 
-type CreateUserInput = { user: NewUser };
+type CreateUserInput = { body: { user: NewUser } };
 
 type UpdateUserInput = { user: NewUser };
 
@@ -31,18 +31,36 @@ function App() {
   const [count, setCount] = useState(0);
   const [userForm, setUserForm] = useState<NewUser>(initialUser);
   const [getUsers, users, isLoadingUsers, usersError] = useFetch<GetUsersOutput, undefined>({ url: `${url}/users`, method: "GET" });
+  const [createUser, newUser, isLoadingPostUser, postError] = useFetch<NewUser, CreateUserInput>({ url: `${url}/users`, method: "POST" })
 
-  const onCreateUser = async () => {
+  const onGetUsers = async () => {
     try {
-      const data = await POST<User, CreateUserInput>(`${url}/users`, {
-        user: userForm,
-      });
-      setUsers((users) => [...users, data]);
-      setUserForm(initialUser);
+      await getUsers(undefined);
     } catch (error) {
       console.error(error);
     }
   };
+
+  const onCreateUser = async () => {
+    try {
+      await createUser({ body: { user: userForm } })
+      // const data = await POST<User, CreateUserInput>(`${url}/users`, {
+      //   user: userForm,
+      // });
+      // setUsers((users) => [...users, data]);
+      // users =  [...onGetUsers(), ]
+      console.log({ body: userForm })
+      setUserForm(initialUser);
+      // onGetUsers()
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  console.log({ userForm })
+  console.log({ isLoadingPostUser })
+  console.log({ postError })
+  console.log({ newUser })
 
   const onUpdateUser = async (id: string, user: User) => {
     try {
@@ -81,16 +99,10 @@ function App() {
     }
   };
 
-  const onGetUsers = async () => {
-    try {
-      await getUsers(undefined);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   useEffect(() => {
     onGetUsers();
+    newUser
   }, []);
 
   return (
@@ -116,14 +128,23 @@ function App() {
           <div style={{ padding: "5px", display: "flex", alignItems: "center", justifyContent: "space-between", }}>
             <label htmlFor="userName">Name </label>
             <input id="userName" type="text" placeholder="write name" value={userForm.name}
-              onChange={(e) =>
+              style={{
+                outline: 'none',
+                color: `${userForm.name.length >= 80 ? 'green' : 'red'}`
+              }}
+              onChange={(e) => {
                 setUserForm((pre) => ({ ...pre, name: e.target.value }))
-              }
+
+              }}
             />
           </div>
           <div style={{ padding: "5px", display: "flex", alignItems: "center", justifyContent: "space-between", }}>
             <label htmlFor="age">Age </label>
-            <input id="age" type="text" placeholder="write age" value={userForm.age}
+            <input id="age" type="number" placeholder="write age" value={userForm.age}
+              style={{
+                outline: 'none',
+                color: `${userForm.age.length === 2 ? 'green' : 'red'}`,
+              }}
               onChange={(e) =>
                 setUserForm((pre) => ({ ...pre, age: e.target.value }))
               }
@@ -132,6 +153,10 @@ function App() {
           <div style={{ padding: "5px", display: "flex", alignItems: "center", justifyContent: "space-between", }} >
             <label htmlFor="email">Email </label>
             <input id="email" type="text" placeholder="write email" value={userForm.email}
+              style={{
+                outline: 'none',
+                color: `${userForm.email.length === 10 ? 'green' : 'red'}`
+              }}
               onChange={(e) =>
                 setUserForm((pre) => ({ ...pre, email: e.target.value }))
               }
@@ -142,7 +167,7 @@ function App() {
         <button onClick={onCreateUser}>Save</button>
         <div>
 
-          <section style={{ border: "solid 2px green" }}>
+          <section>
             <h2>USERS</h2>
             {isLoadingUsers && <p>Is loading...</p>}
             {!isLoadingUsers && usersError && <p>Can not get users, try again later</p>}
@@ -169,11 +194,11 @@ function App() {
 
 export default App;
 
-const GET = async <T,>(url: string): Promise<T> => {
-  const res = await fetch(url);
-  const data = await res.json();
-  return data;
-};
+// const GET = async <T,>(url: string): Promise<T> => {
+//   const res = await fetch(url);
+//   const data = await res.json();
+//   return data;
+// };
 
 // POST
 const POST = async <R, P>(url: string, body: P): Promise<R> => {
