@@ -3,6 +3,7 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import { useFetch } from "./hooks/useFetch";
+import { colors } from "./constants";
 
 type User = {
   id: string;
@@ -19,7 +20,7 @@ type NewUser = {
 
 type GetUsersOutput = User[];
 
-type CreateUserInput = { body: { user: NewUser } };
+type CreateUserInput = { user: NewUser };
 
 type UpdateUserInput = { user: NewUser };
 
@@ -43,24 +44,13 @@ function App() {
 
   const onCreateUser = async () => {
     try {
-      await createUser({ body: { user: userForm } })
-      // const data = await POST<User, CreateUserInput>(`${url}/users`, {
-      //   user: userForm,
-      // });
-      // setUsers((users) => [...users, data]);
-      // users =  [...onGetUsers(), ]
-      console.log({ body: userForm })
+      await createUser({ user: userForm })
       setUserForm(initialUser);
-      // onGetUsers()
+      await getUsers(undefined)
     } catch (error) {
       console.error(error);
     }
   };
-
-  console.log({ userForm })
-  console.log({ isLoadingPostUser })
-  console.log({ postError })
-  console.log({ newUser })
 
   const onUpdateUser = async (id: string, user: User) => {
     try {
@@ -130,7 +120,7 @@ function App() {
             <input id="userName" type="text" placeholder="write name" value={userForm.name}
               style={{
                 outline: 'none',
-                color: `${userForm.name.length >= 80 ? 'green' : 'red'}`
+                color: `${userForm.name.length >= 10 ? 'white' : colors.red}`
               }}
               onChange={(e) => {
                 setUserForm((pre) => ({ ...pre, name: e.target.value }))
@@ -143,7 +133,7 @@ function App() {
             <input id="age" type="number" placeholder="write age" value={userForm.age}
               style={{
                 outline: 'none',
-                color: `${userForm.age.length === 2 ? 'green' : 'red'}`,
+                color: `${userForm.age.length === 2 ? 'white' : colors.red}`,
               }}
               onChange={(e) =>
                 setUserForm((pre) => ({ ...pre, age: e.target.value }))
@@ -155,7 +145,7 @@ function App() {
             <input id="email" type="text" placeholder="write email" value={userForm.email}
               style={{
                 outline: 'none',
-                color: `${userForm.email.length === 10 ? 'green' : 'red'}`
+                color: `${userForm.email.length === 10 ? 'white' : colors.red}`
               }}
               onChange={(e) =>
                 setUserForm((pre) => ({ ...pre, email: e.target.value }))
@@ -172,7 +162,9 @@ function App() {
             {isLoadingUsers && <p>Is loading...</p>}
             {!isLoadingUsers && usersError && <p>Can not get users, try again later</p>}
             {!isLoadingUsers && !usersError && !users && <p>There is not users</p>}
-            {!isLoadingUsers && !usersError && users && users.map((c) => (
+            {isLoadingPostUser && <p>Is loading User ...</p>}
+            {!isLoadingPostUser && postError && <p>Can not post user, try again later</p>}
+            {!isLoadingUsers && !isLoadingPostUser && !usersError && users && users.map((c) => (
               <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 0px", }}>
                 <p onClick={() => onDisplayUser(c.id)}>{c.name}</p>
                 <div style={{ display: "flex" }}>

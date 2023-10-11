@@ -113,3 +113,8 @@ export const domains = [
   "yahoo",
   "outlook"
 ]
+
+export const colors = {
+  red: '#cb4d45',
+
+}
