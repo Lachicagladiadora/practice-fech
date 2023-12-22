@@ -1,4 +1,3 @@
-import "./App.css";
 import { UserForm } from "./components/UserForm";
 import { DELETE, GET, POST, PUT } from "./utils/fetch.utils";
 import { FormEvent, useEffect, useState } from "react";
@@ -20,9 +19,9 @@ type GetUsersOutput = User[];
 
 type OnPutUserParam = {
   event: FormEvent;
-  id: string;
-  userEditForm: NewUser;
 };
+
+type OnDeleteUserOutput = {};
 
 // type CreateUserInput = { user: NewUser };
 
@@ -30,42 +29,58 @@ type OnPutUserParam = {
 
 const url = "http://localhost:3000";
 
-// const initialUser = { name: "", age: "", email: "" };
-const initialSelectedUser = { id: "", name: "", age: "", email: "" };
+const INITIAL_USER: User = { id: "", name: "", age: "", email: "" };
 
 function App() {
   const [users, setUsers] = useState<GetUsersOutput>([]);
-  const [selectedUser, setSelectedUser] = useState<User>(initialSelectedUser);
-  const [createUserForm, setCreateUserForm] =
-    useState<User>(initialSelectedUser);
-  // const [userEditForm, setSelectUser] = useState<NewUser>(initialSelectedUser);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  // const [createUserForm, setCreateUserForm] = useState<NewUser>(INITIAL_USER);
+  // const [userEditForm, setSelectUser] = useState<NewUser>(INITIAL_USER);
   // const [showFormEdit, setShowFormEdit] = useState(false);
 
   const onGetUsers = async () => {
     const data = await GET<GetUsersOutput>(`${url}/users`);
-    console.log("get");
+    // console.log("get");
     setUsers(data);
   };
 
-  const onPostUser = async () => {
-    const data = await POST<User, { user: User }>(`${url}/users`, {
-      user: createUserForm,
-    });
+  const onPostUser = async (event: FormEvent<HTMLButtonElement>) => {
+    // console.log(1);
+    event.preventDefault();
+    event.stopPropagation();
+    // console.log(2);
+    if (!selectedUser) return console.error("Ups, user dosent exist");
+    const newUser: NewUser = {
+      age: selectedUser.age,
+      email: selectedUser.email,
+      name: selectedUser.name,
+    };
+    const body = { user: newUser };
+    // console.log({ body });
+    const data = await POST<User, { user: NewUser }>(`${url}/users`, body);
     console.log(`post ${data}`);
-    setCreateUserForm(initialSelectedUser);
+    // setCreateUserForm(INITIAL_USER);
+    setSelectedUser(null);
     onGetUsers();
   };
 
-  const onPutUser = async ({ event, id, userEditForm }: OnPutUserParam) => {
-    console.log("put");
+  const onPutUser = async (event: FormEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    const data = await PUT<User, { user: NewUser }>(`${url}/users/:${id}`, {
-      user: userEditForm,
-    });
+    if (!selectedUser)
+      throw Error("There is no data on selected user to update");
+    // event.stopPropagation()
+    // console.log("put");
+    const newUser: NewUser = {
+      age: selectedUser.age,
+      email: selectedUser.email,
+      name: selectedUser.name,
+    };
+    const data = await PUT<User, { user: NewUser }>(
+      `${url}/users/${selectedUser.id}`,
+      { user: newUser }
+    );
     console.log({ data });
-    setSelectedUser(initialSelectedUser);
-    // setShowFormEdit(false);
-    setSelectedUser(initialSelectedUser);
+    setSelectedUser(null);
     onGetUsers();
   };
   // console.log("ssss");
@@ -82,7 +97,7 @@ function App() {
   //   console.log("create new user");
   //   // try {
   //   //   await createUser({ user: userForm });
-  //   //   setUserForm(initialUser);
+  //   //   setUserForm(INITIAL_USER);
   //   //   await getUsers(undefined);
   //   // } catch (error) {
   //   //   console.error(error);
@@ -132,9 +147,9 @@ function App() {
   // }, []);
 
   const onDeleteUser = async (id: string) => {
-    const data = await DELETE<GetUsersOutput>(`${url}/users/:${id}`);
+    const data = await DELETE<OnDeleteUserOutput>(`${url}/users/${id}`);
     console.log({ data });
-    setUsers(data);
+    // con(data);
     onGetUsers();
   };
 
@@ -142,69 +157,96 @@ function App() {
     onGetUsers();
   }, []);
 
-  return (
-    <div>
-      <div>
-        <UserForm
-          userForm={createUserForm}
-          setUserForm={setCreateUserForm}
-          nameValue={createUserForm.name}
-          ageValue={createUserForm.age}
-          emailValue={createUserForm.email}
-          onClick={onPostUser}
-        />
-        <section>
-          <h2>USERS</h2>
+  console.log({ dd: selectedUser, users });
 
-          {
-            //!isLoadingUsers &&
-            // !isLoadingPostUser &&
-            // !usersError &&
-            // users &&
-            users.map((c) => (
-              <div
-                key={c.id}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "4px 0px",
-                }}
-              >
-                {c.id !== selectedUser.id && (
-                  <p onClick={() => console.log("onDisplayUser(c.id)")}>
-                    {c.name}
-                  </p>
-                )}
-                {c.id === selectedUser.id && (
-                  <UserForm
-                    userForm={selectedUser}
-                    setUserForm={setSelectedUser}
-                    onClick={() =>
-                      onPutUser({
-                        event: event,
-                        id: selectedUser.id,
-                        userEditForm: selectedUser,
-                      })
-                    }
-                  />
-                )}
-                <div style={{ display: "flex" }}>
-                  <button
-                    onClick={() => {
-                      setSelectedUser(c);
-                    }}
-                  >
-                    {c.id === selectedUser.id ? "Cancel" : "Edit"}
-                  </button>
+  return (
+    <main
+      style={{
+        border: "solid 2px",
+        height: "100vh",
+        display: "grid",
+        gridTemplateRows: "auto 1fr",
+      }}
+    >
+      <section
+        style={{
+          padding: "8px",
+          display: "grid",
+          gridAutoColumns: "1fr",
+          gap: "8px",
+          border: "solid 2px red",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h2>USERS</h2>
+          <button onClick={() => setSelectedUser(INITIAL_USER)}>Add</button>
+        </div>
+
+        {selectedUser && !selectedUser.id && (
+          <UserForm
+            user={selectedUser}
+            setUser={setSelectedUser}
+            // nameValue={createUserForm.name}
+            // ageValue={createUserForm.age}
+            // emailValue={createUserForm.email}
+            onSubmit={onPostUser}
+          />
+        )}
+      </section>
+
+      <section style={{ border: "solid 2px red" }}>
+        {
+          //!isLoadingUsers &&
+          // !isLoadingPostUser &&
+          // !usersError &&
+          // users &&
+          users.map((c) => (
+            <div
+              key={c.id}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "4px 0px",
+              }}
+            >
+              {/* user */}
+              {c.id !== selectedUser?.id && (
+                <p onClick={() => console.log("onDisplayUser(c.id)")}>
+                  {c.name}
+                </p>
+              )}
+
+              {!selectedUser && (
+                <>
+                  <button onClick={() => setSelectedUser(c)}>Edit</button>
                   <button onClick={() => onDeleteUser(c.id)}>Delete</button>
-                </div>
-              </div>
-            ))
-          }
-        </section>
-      </div>
-    </div>
+                </>
+              )}
+
+              {/* user form */}
+              {selectedUser && c.id === selectedUser.id && (
+                <UserForm
+                  user={selectedUser}
+                  setUser={setSelectedUser}
+                  onSubmit={onPutUser}
+                />
+              )}
+
+              {selectedUser && c.id === selectedUser.id && (
+                <button onClick={() => setSelectedUser(null)}>Cancel</button>
+              )}
+            </div>
+          ))
+        }
+      </section>
+    </main>
   );
 }
 

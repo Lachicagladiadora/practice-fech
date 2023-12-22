@@ -1,32 +1,21 @@
-import { User } from "../App";
+import { NewUser, User } from "../App";
 import { colors } from "../constants";
 
 type UserFormProps = {
-  userForm: User;
-  setUserForm: React.Dispatch<React.SetStateAction<User>>;
-  nameValue?: string;
-  ageValue?: string;
-  emailValue?: string;
-  onClick: () => void;
+  user: User;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  onSubmit: React.FormEventHandler<HTMLButtonElement>;
 };
 
 const validateEmail = new RegExp(
   "[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*@[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,5}"
 );
 
-export const UserForm = ({
-  userForm,
-  setUserForm,
-  // nameValue,
-  // ageValue,
-  // emailValue,
-  onClick,
-}: UserFormProps) => {
+export const UserForm = ({ user, setUser, onSubmit }: UserFormProps) => {
   return (
     <form
       style={{
         padding: "8px",
-        margin: "10px",
         width: "auto",
         border: "solid 1px grey",
         borderRadius: "10px",
@@ -50,8 +39,8 @@ export const UserForm = ({
           <label
             htmlFor="userName"
             style={{
-              color: `${userForm.name.length >= 10 ? "white" : colors.red} || ${
-                userForm.name === "" ? colors.red : "white"
+              color: `${user.name.length >= 10 ? "black" : colors.red} || ${
+                user.name === "" ? colors.red : "black"
               }`,
             }}
           >
@@ -61,24 +50,24 @@ export const UserForm = ({
             id="userName"
             type="text"
             placeholder="write name"
-            value={userForm.name}
+            value={user.name}
             style={{
               padding: "4px",
               outline: "none",
               border: "solid 2px",
               borderColor: `${
-                userForm.name.length >= 10 || userForm.name !== " "
-                  ? "white"
+                user.name.length >= 10 || user.name !== " "
+                  ? "black"
                   : colors.red
               } `,
               color: `${
-                userForm.name.length >= 10 || userForm.name !== " "
-                  ? "white"
+                user.name.length >= 10 || user.name !== " "
+                  ? "black"
                   : colors.red
               } `,
             }}
             onChange={(e) => {
-              setUserForm((pre) => ({ ...pre, name: e.target.value }));
+              setUser((pre) => (pre ? { ...pre, name: e.target.value } : null));
             }}
           />
         </div>
@@ -96,24 +85,24 @@ export const UserForm = ({
             id="age"
             type="number"
             placeholder="write age"
-            value={userForm.age}
+            value={user.age}
             style={{
               padding: "4px",
               outline: "none",
               outlineColor: "orange",
               borderColor: `${
-                userForm.age.length === 1 || userForm.age.length === 2
-                  ? "white"
+                user.age.length === 1 || user.age.length === 2
+                  ? "black"
                   : colors.red
               } `,
               color: `${
-                userForm.age.length === 1 || userForm.age.length === 2
-                  ? "white"
+                user.age.length === 1 || user.age.length === 2
+                  ? "black"
                   : colors.red
               } `,
             }}
             onChange={(e) =>
-              setUserForm((pre) => ({ ...pre, age: e.target.value }))
+              setUser((pre) => (pre ? { ...pre, age: e.target.value } : null))
             }
           />
         </div>
@@ -131,33 +120,39 @@ export const UserForm = ({
             id="email"
             type="text"
             placeholder="write email"
-            value={userForm.email}
+            value={user.email}
             style={{
               padding: "4px",
               outline: colors.red,
               borderColor: `${
-                userForm.email.length >= 10 ||
-                userForm.email !== " " ||
-                userForm.email === String(validateEmail)
-                  ? "white"
+                user.email.length >= 10 ||
+                user.email !== " " ||
+                user.email === String(validateEmail)
+                  ? "black"
                   : colors.red
               } `,
               color: `${
-                userForm.email.length >= 10 || userForm.email !== " "
-                  ? "white"
+                user.email.length >= 10 || user.email !== " "
+                  ? "black"
                   : colors.red
               } `,
             }}
             onChange={(e) =>
-              setUserForm((pre) => ({ ...pre, email: e.target.value }))
+              setUser((pre) => (pre ? { ...pre, email: e.target.value } : null))
             }
           />
         </div>
       </div>
-      {userForm.name === " " && (
+      {user.name === " " && (
         <p style={{ color: colors.red }}>name is not correct</p>
       )}
-      <button onClick={onClick} style={{ width: "200px" }}>
+      <button
+        onClick={(e) => {
+          console.log(e, "df");
+          onSubmit(e);
+        }}
+        style={{ width: "200px" }}
+      >
         Save
       </button>
     </form>
